@@ -30,6 +30,7 @@
     "react-chessboard": "^4.3.2",
     "react-dom": "^18.2.0",
     "react-use-websocket": "^4.5.0",
+    "redis": "^4.6.12",
     "uuidv4": "^6.2.13"
   },
   "devDependencies": {

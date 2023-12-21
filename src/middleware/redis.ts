@@ -18,15 +18,15 @@ export const publishMessage = async (channel: string, message: string) => {
   await publisher.quit()
 }
 
-export const subscribe = async (channel: string, context: Context) => {
-  const subscriber = await client()
-
-  await subscriber.pSubscribe(channel, (message: string) => {
-    context.websocket.send(message)
-  })
-
-  context.websocket.on('close', async function () {
-    await subscriber.pUnsubscribe(channel)
-    await subscriber.quit()
-  })
-}
+// export const subscribe = async (channel: string, context: Context) => {
+//   const subscriber = await client()
+// 
+//   await subscriber.pSubscribe(channel, (message: string) => {
+//     context.websocket.send(message)
+//   })
+// 
+//   context.websocket.on('close', async function () {
+//     await subscriber.pUnsubscribe(channel)
+//     await subscriber.quit()
+//   })
+// }
