@@ -1,4 +1,7 @@
 import { Chess } from "chess.js";
+import { useEffect } from 'react';
+import { Server } from 'Socket.IO'
+import io from 'Socket.IO-client';
 import { GameModel } from "../../entities";
 import type { Chess as ChessType } from "chess.js";
 import type { GetServerSidePropsContext } from "next";
@@ -16,8 +19,14 @@ export default function Game({
 }
 
 export const getServerSideProps = async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext & { res :{ socket: any } }
 ) => {
+  if (!context.res.socket.server.io) {
+    context.res.socket.server.io = new Server(context.res.socket.server, {
+      path: "/coms"
+    })
+  }
+
   await mongoConnect();
 
   const game = await GameModel.findOne({ id: context.query.gameId }).exec();

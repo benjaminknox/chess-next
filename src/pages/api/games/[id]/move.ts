@@ -14,7 +14,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const session = await getServerSession(req, res, authOptions)
 
     try {
-      let game = await GameModel.findOne({ id: req.query.id }).exec()
+      const gameId = req.query.id
+      let game = await GameModel.findOne({ id: gameId }).exec()
       if (game) {
         const turn =
           new Chess(game.moves[game.moves.length - 1].move).turn() === 'b'
@@ -31,7 +32,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
           game.moves.push(gameMove)
 
-          publishMessage('gameMove', gameMove.move)
+          res.socket.server.io.emit(gameId, gameMove.move)
 
           game = await game.save()
 

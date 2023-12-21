@@ -1,11 +1,11 @@
 import axios from "axios";
 import { uuid } from "uuidv4";
-import { Chess } from "chess.js";
 import { Game } from "../types";
-import { useState, useEffect } from "react";
+import { Chess } from "chess.js";
+import io from 'Socket.IO-client';
 import { PlayerCardContainer, Board } from ".";
 import { useSession } from "next-auth/react";
-import useWebSocket from "react-use-websocket";
+import { useState, useEffect, useCallback } from "react";
 import type { Chess as ChessType } from "chess.js";
 
 export interface BoardContainerProps {
@@ -18,14 +18,21 @@ export function BoardContainer({ gameId, lastMove = new Chess() }: BoardContaine
   const [game, setGame] = useState<Game<string>>();
   const [board, setChess] = useState<ChessType>(lastMove);
 
-  const [gameSocketUri, setGameSocketUri] = useState<string>(
-    "wss://echo.websocket.org"
-  );
-  const { lastMessage } = useWebSocket(gameSocketUri);
+  const socketInitializer = useCallback(async () => {
+    const socket = io("/", {
+      path: "/coms"
+    })
+
+    socket.on(gameId, move => {
+      setChess(new Chess(move))
+    })
+
+    return socket
+  }, [gameId])
 
   useEffect(() => {
-    if (lastMessage) setChess(new Chess(lastMessage.data));
-  }, [lastMessage]);
+    socketInitializer()
+  }, [socketInitializer])
 
   useEffect(() => {
     axios(`/api/games/${gameId}`, {
@@ -40,10 +47,6 @@ export function BoardContainer({ gameId, lastMove = new Chess() }: BoardContaine
         if (body.moves.length > 0) {
           setChess(new Chess(body.moves[body.moves.length - 1].move));
         }
-
-        setGameSocketUri(
-          `${process.env.NEXT_PUBLIC_WEBSOCKET_URI}/games/${body.id}`
-        );
       });
   }, [gameId]);
 
